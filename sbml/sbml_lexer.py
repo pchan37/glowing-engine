@@ -89,12 +89,6 @@ def t_INTEGER(t):
     return t
 
 
-@lex.TOKEN(Type.BOOLEAN.value)
-def t_BOOLEAN(t):
-    t.value = t.value == 'True'
-    return t
-
-
 @lex.TOKEN(Type.STRING.value)
 def t_STRING(t):
     return t
@@ -103,6 +97,12 @@ def t_STRING(t):
 @lex.TOKEN(Type.IDENTIFIER.value)
 def t_IDENTIFIER(t):
     t.type = reserved_tokens.get(t.value, Type.IDENTIFIER.name)
+
+    # Take care of boolean here as they are also reserved words that falls
+    # under the general variable regex
+    if t.value == 'True' or t.value == 'False':
+        t.type = 'BOOLEAN'
+        t.value = t.value == 'True'
     return t
 
 
