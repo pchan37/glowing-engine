@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# PLY byproducts
+parser.out
+parsetab.py

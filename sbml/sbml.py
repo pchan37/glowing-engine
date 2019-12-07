@@ -21,15 +21,17 @@ def main():
     with open(filename, 'r') as file_handler:
         try:
             file_content = file_handler.read()
+            symbol_table = {}
             ast = parser.parse(file_content)
-            print(f'Result is: {ast.evaluate()}')
+            ast.evaluate(symbol_table)
         except SyntaxError as e:
-            print(e.args[0])
+            print(e)
         except SemanticError as e:
-            print(e.args[0])
+            print(e)
         except RuntimeError as e:
             # This scenario should never happen
-            print(e.args[0])
+            print(e)
+            raise e
 
 
 if '__main__' == __name__:

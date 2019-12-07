@@ -10,23 +10,29 @@ if MODULE_DIR_NAME not in sys.path:
 import ply.lex as lex
 import re
 from sbml_enums import Keyword, Operator, Type
+from sbml_utils import is_identifier
 
 
-keyword_tokens = [token.name for token in Keyword]
-operator_tokens = [token.name for token in Operator]
-type_tokens = [token.name for token in Type]
-tokens = keyword_tokens + operator_tokens + type_tokens
+reserved_tokens = {
+    kw.value: kw.name for kw in Keyword if is_identifier(kw, is_token=True)
+}
+reserved_tokens.update({
+    op.value: op.name for op in Operator if is_identifier(op, is_token=True)
+})
+reserved_tokens.update({
+    t.value: t.name for t in Type if is_identifier(t, is_token=True)
+})
+
+extra_op_tokens = [
+    token.name for token in Operator if not is_identifier(token, is_token=True)
+]
+extra_type_tokens = [
+    token.name for token in Type if not is_identifier(token, is_token=True)
+]
+tokens = list(reserved_tokens.values()) + extra_op_tokens + extra_type_tokens
 
 
 t_ignore = ' \t'
-
-
-t_IF = re.escape(Keyword.IF.value)
-t_ELSE = re.escape(Keyword.ELSE.value)
-
-t_WHILE = re.escape(Keyword.WHILE.value)
-
-t_PRINT = re.escape(Keyword.PRINT.value)
 
 
 t_LPAREN = re.escape(Operator.LPAREN.value)
@@ -37,7 +43,6 @@ t_LBRACE = re.escape(Operator.LBRACE.value)
 t_RBRACE = re.escape(Operator.RBRACE.value)
 t_COMMA = re.escape(Operator.COMMA.value)
 t_SEMICOLON = re.escape(Operator.SEMICOLON.value)
-t_TAKES_VALUE = re.escape(Operator.TAKES_VALUE.value)
 
 t_TUPLE_INDEX = re.escape(Operator.TUPLE_INDEX.value)
 
@@ -61,13 +66,15 @@ t_LESS_EQUAL = re.escape(Operator.LESS_EQUAL.value)
 t_GREATER_EQUAL = re.escape(Operator.GREATER_EQUAL.value)
 t_EQUAL = re.escape(Operator.EQUAL.value)
 t_NOT_EQUAL = re.escape(Operator.NOT_EQUAL.value)
-t_NOT_EQUAL_ALT = re.escape(Operator.NOT_EQUAL_ALT.value)
 
 t_NOT = re.escape(Operator.NOT.value)
 
 t_ANDALSO = re.escape(Operator.ANDALSO.value)
 
 t_ORELSE = re.escape(Operator.ORELSE.value)
+
+# Has to be after t_EQUAL as it's shorter in length
+t_TAKES_VALUE = re.escape(Operator.TAKES_VALUE.value)
 
 
 @lex.TOKEN(Type.REAL.value)
@@ -90,7 +97,12 @@ def t_BOOLEAN(t):
 
 @lex.TOKEN(Type.STRING.value)
 def t_STRING(t):
-    t.value = t.value[1:-1]
+    return t
+
+
+@lex.TOKEN(Type.IDENTIFIER.value)
+def t_IDENTIFIER(t):
+    t.type = reserved_tokens.get(t.value, Type.IDENTIFIER.name)
     return t
 
 

@@ -11,9 +11,11 @@ import ply.yacc as yacc
 import sbml_lexer
 from sbml_ast_nodes import (
     Node, BlockNode, ConditionNode, ExpressionNode, StatementNode,
-    CollectionNode 
+    CollectionNode, VariableNode
 )
+from sbml_enums import Operator
 from sbml_errors import SyntaxError
+from sbml_utils import is_identifier
 
 
 sbml_lexer.analyze()
@@ -71,6 +73,7 @@ def p_statement(p):
               | IF_STATEMENT
               | WHILE_STATEMENT
               | PRINT_STATEMENT
+              | ASSIGNMENT_STATEMENT
     '''
     if len(p) == 3:
         p[0] = p[1]
@@ -118,6 +121,25 @@ def p_print(p):
         p[0] = StatementNode(p[3], keyword=p[1])
     else:
         raise RuntimeError('Case not handled')
+
+
+def p_assignment(p):
+    '''
+    ASSIGNMENT_STATEMENT : IDENTIFIER TAKES_VALUE OR SEMICOLON
+                         | IDENTIFIER LBRACKET OR RBRACKET TAKES_VALUE OR SEMICOLON
+                         | LBRACKET RBRACKET LBRACKET OR RBRACKET TAKES_VALUE OR SEMICOLON
+    
+    '''
+    if len(p) == 5:
+        p[0] = StatementNode(p[1], p[3], keyword=p[2])
+    elif len(p) == 8:
+        p[0] = StatementNode(p[1], p[3], p[6], keyword=p[5])
+    elif len(p) == 9:
+        raise SemanticError()
+    elif len(p) == 10:
+        p[0] = StatementNode(p[2], p[5], p[8], keyword=p[7])
+    else:
+        raise RuntimeError()
 
 
 def p_or(p):
@@ -168,7 +190,6 @@ def p_comparison(p):
                | COMPARISON GREATER_EQUAL CONS_LIST
                | COMPARISON EQUAL CONS_LIST
                | COMPARISON NOT_EQUAL CONS_LIST
-               | COMPARISON NOT_EQUAL_ALT CONS_LIST
     '''
     if len(p) == 2:
         p[0] = p[1]
@@ -264,11 +285,14 @@ def p_list_str_indexing(p):
     '''
     LIST_STR_INDEXING : TUPLE_INDEXING
                       | LIST_STR_INDEXING LBRACKET OR RBRACKET
+                      | LIST_STR_INDEXING LBRACKET OR RBRACKET TAKES_VALUE OR
     '''
     if len(p) == 2:
         p[0] = p[1]
     elif len(p) == 5:
         p[0] = ExpressionNode(p[1], p[3], operator=p[2])
+    elif len(p) == 7:
+        p[0] = StatementNode(p[1], p[3], p[6], keyword=p[5])
     else:
         raise RuntimeError('Case not handled')
 
@@ -347,11 +371,14 @@ def p_primary(p):
             | INTEGER
             | REAL
             | STRING
+            | IDENTIFIER
             | LPAREN OR RPAREN
     '''
     if len(p) == 2:
         if isinstance(p[1], Node):
             p[0] = p[1]
+        elif is_identifier(p[1]):
+            p[0] = VariableNode(p[1])
         else:
             p[0] = ExpressionNode(p[1])
     elif len(p) == 4:
@@ -361,6 +388,7 @@ def p_primary(p):
 
 
 def p_error(p):
+    print(p)
     raise SyntaxError()
 
 
