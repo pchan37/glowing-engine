@@ -100,7 +100,7 @@ class ExpressionNode(Node):
                 raise SemanticError()
 
             elif case(Operator.CONS):
-                if of_valid_types([args[1]], [list]):
+                if of_valid_types([args[1]], [[list]]):
                     args[1].insert(0, args[0])
                     return args[1]
                 raise SemanticError()
