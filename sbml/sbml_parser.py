@@ -32,7 +32,7 @@ def p_start(p):
     if len(p) == 2:
         p[0] = p[1]
     else:
-        raise SyntaxError()
+        raise SyntaxError
 
 
 def p_block(p):
@@ -135,11 +135,11 @@ def p_assignment(p):
     elif len(p) == 8:
         p[0] = StatementNode(p[1], p[3], p[6], keyword=p[5])
     elif len(p) == 9:
-        raise SemanticError()
+        raise SemanticError
     elif len(p) == 10:
         p[0] = StatementNode(p[2], p[5], p[8], keyword=p[7])
     else:
-        raise RuntimeError()
+        raise RuntimeError('Case not handled')
 
 
 def p_or(p):
@@ -388,8 +388,7 @@ def p_primary(p):
 
 
 def p_error(p):
-    print(p)
-    raise SyntaxError()
+    raise SyntaxError
 
 
 def get_parser():

@@ -64,93 +64,93 @@ class ExpressionNode(Node):
             if case(Operator.ORELSE):
                 if of_valid_types(args, [[bool]]):
                     return functools.reduce(operator.or_, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.ANDALSO):
                 if of_valid_types(args, [[bool]]):
                     return functools.reduce(operator.and_, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.NOT):
                 if of_valid_types(args, [[bool]]): 
                     return not args[0]
-                raise SemanticError()
+                raise SemanticError
 
             elif case(Operator.LESS_THAN):
                 if of_valid_types(args, [[int, float], [str]]):
                     return functools.reduce(operator.lt, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.LESS_EQUAL):
                 if of_valid_types(args, [[int, float], [str]]):
                     return functools.reduce(operator.le, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.GREATER_THAN):
                 if of_valid_types(args, [[int, float], [str]]):
                     return functools.reduce(operator.gt, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.GREATER_EQUAL):
                 if of_valid_types(args, [[int, float], [str]]):
                     return functools.reduce(operator.ge, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.EQUAL):
                 if of_valid_types(args, [[int, float], [str]]):
                     return functools.reduce(operator.eq, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.NOT_EQUAL):
                 if of_valid_types(args, [[int, float], [str]]):
                     return functools.reduce(operator.ne, args)
-                raise SemanticError()
+                raise SemanticError
 
             elif case(Operator.CONS):
                 if of_valid_types([args[1]], [[list]]):
                     args[1].insert(0, args[0])
                     return args[1]
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.IN):
                 if of_valid_types([args[1]], [[list]]) or \
                    of_valid_types(args, [[str]]):
                     return args[0] in args[1]
-                raise SemanticError()
+                raise SemanticError
             
             elif case(Operator.PLUS):
                 if of_valid_types(args, [[int, float], [str], [list]]):
                     return functools.reduce(operator.add, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.MINUS):
                 if of_valid_types(args, [[int, float]]):
                     return functools.reduce(operator.sub, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.TIMES):
                 if of_valid_types(args, [[int, float]]):
                     return functools.reduce(operator.mul, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.DIVIDE):
-                if of_valid_types(args, [[int, float]]):
+                if of_valid_types(args, [[int, float]]) and 0 not in args[1:]:
                     return functools.reduce(operator.truediv, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.DIV):
-                if of_valid_types(args, [[int]]):
+                if of_valid_types(args, [[int]]) and 0 not in args[1:]:
                     return functools.reduce(operator.floordiv, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.MOD):
                 if of_valid_types(args, [[int]]):
                     return functools.reduce(operator.mod, args)
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.EXPONENT):
                 if of_valid_types(args, [[int, float]]):
                     return functools.reduce(operator.pow, args)
-                raise SemanticError()
+                raise SemanticError
 
             elif case(Operator.LBRACKET):
                 if of_valid_types([args[0]], [[list, str]]) and \
                    of_valid_types([args[1]], [[int]]) and \
                    0 <= args[1] < len(args[0]):
                     return args[0][args[1]]
-                raise SemanticError()
+                raise SemanticError
             elif case(Operator.TUPLE_INDEX):
                 if of_valid_types([args[0]], [[int]]) and \
                    of_valid_types([args[1]], [[tuple]]) and \
                    0 < args[0] <= len(args[1]):
                     return args[1][args[0] - 1]
-                raise SemanticError()
+                raise SemanticError
 
             raise RuntimeError('Case not handled')
 
@@ -169,14 +169,14 @@ class ConditionNode(Node):
                     if condition: 
                         return evaluate_node(self.args[1], symbol_table)
                     return None
-                raise SemanticError()
+                raise SemanticError
             elif case(Keyword.IF + Keyword.ELSE):
                 condition = self.args[0].evaluate(symbol_table)
                 if of_valid_types([condition], [[bool]]):
                     if condition:
                         return evaluate_node(self.args[1], symbol_table)
                     return evaluate_node(self.args[2], symbol_table)
-                raise SemanticError()
+                raise SemanticError
             elif case(Keyword.WHILE):
                 condition = evaluate_node(self.args[0], symbol_table)
                 if of_valid_types([condition], [[bool]]):
@@ -188,7 +188,7 @@ class ConditionNode(Node):
                             break
                     else:
                         return None
-                raise SemanticError()
+                raise SemanticError
             raise RuntimeError('Case not handled')
     
 
@@ -264,7 +264,7 @@ class VariableNode(Node):
     def evaluate(self, symbol_table):
         if self.args[0] in symbol_table:
             return symbol_table[self.args[0]]
-        raise SemanticError()
+        raise SemanticError
 
 
 def evaluate_nodes(nodes, symbol_table):

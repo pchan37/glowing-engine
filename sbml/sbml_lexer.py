@@ -10,6 +10,7 @@ if MODULE_DIR_NAME not in sys.path:
 import ply.lex as lex
 import re
 from sbml_enums import Keyword, Operator, Type
+from sbml_errors import SyntaxError
 from sbml_utils import is_identifier
 
 
@@ -118,7 +119,7 @@ def t_comment(t):
 
 def t_error(t):
     t.lexer.skip(1)
-    raise SyntaxError('Syntax Error')
+    raise SyntaxError
 
 
 def analyze():
